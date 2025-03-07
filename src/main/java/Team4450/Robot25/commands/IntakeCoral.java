@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public class IntakeCoral extends Command {
     private final ElevatedManipulator elevatedManipulator;
 
-    private static enum State{MOVING, INTAKE, STOP};
+    private static enum State{MOVING, INTAKE, STOP, TOGGLE};
     private State state = State.MOVING;
 
     public IntakeCoral(ElevatedManipulator elevatedManipulator){
@@ -56,5 +56,13 @@ public class IntakeCoral extends Command {
         Util.consoleLog("interrupted=%b", interrupted);
         elevatedManipulator.coralManipulator.stop();
         SmartDashboard.putString("Intake Coral Status", state.name());
+    }
+
+    public void toggle() {
+        if (elevatedManipulator.coralManipulator.hasCoral()) {
+            elevatedManipulator.coralManipulator.stop(); // Stop the coral manipulator if there is already a coral
+        } else {
+            state = State.TOGGLE; // Switch the state to TOGGLE if there is no coral
+        }
     }
 }

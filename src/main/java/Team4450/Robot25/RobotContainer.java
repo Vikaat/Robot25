@@ -88,6 +88,8 @@ public class RobotContainer
 	public static AlgaeGroundIntake		algaeGroundIntake;
 	public static CoralManipulator		coralManipulator;
 	public static Climber 				climber;
+	private final IntakeCoral intakeCoralCommand = new IntakeCoral(elevatedManipulator);
+
 
 	// Subsystem Default Commands.
 
@@ -511,6 +513,11 @@ public class RobotContainer
 		
 		new Trigger(() -> utilityController.getStartButton())
 			.toggleOnTrue(new InstantCommand(elevator::resetEncoders));
+
+		new Trigger(() -> driverController.getLeftTriggerAxis() > 0.5)
+            .onTrue(new InstantCommand(intakeCoralCommand::toggle));
+
+		
 		
 		
 			
