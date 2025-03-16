@@ -69,6 +69,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import Team4450.Robot25.commands.AlignToReefTagRelative;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -423,9 +424,11 @@ public class RobotContainer
 		 //                  .andThen(new RotateToPose(driveBase, true, true)));
 
         new Trigger(()-> driverController.getRightBumperButton())
-		 	.whileTrue(new RotateToPose(driveBase, true, true)
-		 	.andThen(new GoToPose(driveBase, true, true)));
+		 	.onTrue( new AlignToReefTagRelative(true, driveBase));
 		 	//.whileTrue(new GoToPose(driveBase, true, true));
+
+		new Trigger(() -> driverController.getLeftBumperButton())
+			.onTrue(new AlignToReefTagRelative(false, driveBase));
 
 			
 		//Drive to the Right Branch, offsetting from AprilTag (using Pose information)
