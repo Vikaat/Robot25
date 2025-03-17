@@ -80,6 +80,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import Team4450.Robot25.commands.AlignToReefTagRelative;
 
 /**
  * This class is where the bulk of the robot should be declared.  Since Command-based is a
@@ -433,20 +434,19 @@ public class RobotContainer
 		// 	.onTrue(new DriveToRight(driveBase, pvCoralTagCamera, true, true));
 
  		//Drive to the AprilTag
-		new Trigger(() -> driverController.getXButton())
+		new Trigger(() -> driverController.getYButton())
 			.whileTrue(new DriveToTag(driveBase, pvTagCamera, true, true));
 
-		new Trigger(() -> driverController.getRightTrigger())
-			.whileTrue(new DriveToRight(driveBase, pvTagCamera));
-		new Trigger(() -> driverController.getLeftTrigger())
-			.whileTrue(new DriveToLeft(driveBase, pvTagCamera, true, true));
+// 		new Trigger(() -> driverController.getRightTrigger())
+// 			.whileTrue(new DriveToRight(driveBase, pvTagCamera));
+// 		new Trigger(() -> driverController.getLeftTrigger())
+// 			.whileTrue(new DriveToLeft(driveBase, pvTagCamera, true, true));
 		
     	// Drive to the AprilTag using Pose information
 		 //new Trigger(()-> driverController.getLeftTrigger())
 		 //	.onTrue(new SetTagBasedPosition(driveBase, pvTagCamera, 0, false));
 		 	//.andThen(new RotateToPose(driveBase, true, true))
 		 	//.andThen(new GoToPose(driveBase, true, true)));
-
          
 		//COMMENTED OUT FOR BACKUP
 // 		 new Trigger(()-> driverController.getLeftTrigger())
@@ -476,6 +476,33 @@ public class RobotContainer
 		// // 	.whileTrue(new SetTagBasedPosition(driveBase, pvTagCamera, -1)
 		// // 	.andThen(new RotateToPose(driveBase, true, true))
 		// // 	.andThen(new GoToPose(driveBase, true, true)));
+
+            
+		 new Trigger(()-> driverController.getLeftTrigger())
+		          .onTrue(new AlignToReefTagRelative(false, driveBase));
+		 //                  .andThen(new RotateToPose(driveBase, true, true)));
+
+//         new Trigger(()-> driverController.getRightBumperButton())
+// 		 	.onTrue( new AlignToReefTagRelative(true, driveBase));
+// 		 	//.whileTrue(new GoToPose(driveBase, true, true));
+
+// 		new Trigger(() -> driverController.getLeftBumperButton())
+// 			.onTrue(new AlignToReefTagRelative(false, driveBase));
+
+			
+		//Drive to the Right Branch, offsetting from AprilTag (using Pose information)
+		new Trigger(()-> driverController.getRightTrigger())
+			// .whileTrue(new SetTagBasedPosition(driveBase, pvTagCamera, 1)
+			// .andThen(new RotateToPose(driveBase, true, true))
+			// .andThen(new GoToPose(driveBase, true, true)));
+			.onTrue(new AlignToReefTagRelative(true, driveBase));
+
+		// Drive to the Right Branch, offsetting from AprilTag (using Pose information)
+		// new Trigger(()-> driverController.getLeftTrigger())
+		// 	.whileTrue(new SetTagBasedPosition(driveBase, pvTagCamera, -1)
+		// 	.andThen(new RotateToPose(driveBase, true, true))
+		// 	.andThen(new GoToPose(driveBase, true, true)));
+
 		
 		new Trigger(() -> driverController.getBButton())
 			.onTrue(new ParallelCommandGroup(new InstantCommand(() -> elevatedManipulator.executeSetPosition(PresetPosition.CLIMB), elevatedManipulator),
