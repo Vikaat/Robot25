@@ -420,7 +420,7 @@ public class RobotContainer
 		 	//.andThen(new GoToPose(driveBase, true, true)));
             
 		 new Trigger(()-> driverController.getLeftTrigger())
-		          .onTrue(new SetTagBasedPosition(driveBase, pvCoralTagCamera, 0, false));
+		          .onTrue(new AlignToReefTagRelative(false, driveBase));
 		 //                  .andThen(new RotateToPose(driveBase, true, true)));
 
         new Trigger(()-> driverController.getRightBumperButton())
@@ -436,8 +436,7 @@ public class RobotContainer
 			// .whileTrue(new SetTagBasedPosition(driveBase, pvTagCamera, 1)
 			// .andThen(new RotateToPose(driveBase, true, true))
 			// .andThen(new GoToPose(driveBase, true, true)));
-			.onTrue(new InstantCommand(() -> driveBase.setFieldRelative(false)))
-            .onFalse(new InstantCommand(() -> driveBase.setFieldRelative(true)));
+			.onTrue(new AlignToReefTagRelative(true, driveBase));
 
 		// Drive to the Right Branch, offsetting from AprilTag (using Pose information)
 		// new Trigger(()-> driverController.getLeftTrigger())
