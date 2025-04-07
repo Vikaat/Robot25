@@ -35,18 +35,24 @@ public class Robot extends TimedRobot
   public void robotInit() 
   {
     try {
+        // ! Do I not understand Java or what is this for?
       robot = this;   // Stored in Constants.
 
+      // ! What is the LCD, just to definition does not work on it and I don't see the import.
       LCD.clearAll();
       LCD.printLine(LCD_1, "Mode: RobotInit");
 
       // Set up our custom logger.
 
+      // ! What is the difference.
       Util.CustomLogger.setup();
+
+      // ! If this is the difference it should be before the line of code not after.
+      // ! If we are overrunning the periodic should we not just make it less frequent.
 
       // The wpilib classes that underlie this class generate a lot of warning
       // messages that flood the Riolog and make it almost unusable. The warnings 
-      // are about our code in the robotPeriodic() function taking longer than .02 
+      // are about our code in the robotPeriodic() function taking longer than 0.02 
       // sec to execute. It's very hard to stay under this limit. So...copied classes 
       // from the wpilib name space to inside this project and modified them to allow
       // us to control these warnings and log some of them to our log file. The warnings 
@@ -62,15 +68,16 @@ public class Robot extends TimedRobot
       // IterativeRobotBase and Watchdog have been modified. TimedRobot is needed to 
       // pull in these modified classes. Look for "4450" in the code for the mods.
       //
-      // Note that the periodic function is called very .02 sec. If our code runs too
+      // Note that the periodic function is called very 0.02 sec. If our code runs too
       // long that can lead to various control problems. But, it has proven hard to
-      // do anything useful and not exceed the .02 sec watchdogs, though we have made
+      // do anything useful and not exceed the 0.02 sec watchdogs, though we have made
       // improvements to various functions to reduce execution time or used threading.
       // We have trimmed the volume of overrun messages but they still occur.
 
       enableWatchDogWarning(false);
       enableWatchDogFlush(false);
       this.setWatchDogTimeout(.04);
+      // ! What does this mean, does it mean that commands are ran at the top of every second?
       CommandScheduler.getInstance().setPeriod(1.0);
 
       // Set Java to catch any uncaught exceptions and record them in our log file.
@@ -93,12 +100,11 @@ public class Robot extends TimedRobot
 
       SendableVersion.INSTANCE.init(PROGRAM_NAME);
 
+      // Why will this information not be correct during simulation.
       // Note: under simulation, this information will not be correct.
       Util.consoleLog("%s compiled by %s at %s (branch=%s, commit=%s)", SendableVersion.INSTANCE.getProgramVersion(),
           SendableVersion.INSTANCE.getUser(), SendableVersion.INSTANCE.getTime(), SendableVersion.INSTANCE.getBranch(),
           SendableVersion.INSTANCE.getCommit());
-
-      //Util.consoleLog("manifest path=%s", SendableVersion.INSTANCE.getPath());
 
       // Send program version to the dashboard.
       SmartDashboard.putString("Program", PROGRAM_NAME);
@@ -107,6 +113,8 @@ public class Robot extends TimedRobot
       // than robot WPILib version. Should be the same for best results.
       Util.consoleLog("Robot WPILib=%s  Java=%s", WPILibVersion.Version, System.getProperty("java.version"));
       Util.consoleLog("RobotLib=%s", LibraryVersion.version);
+
+      // ! Is there a way to fix this.
 
       // Note: Any Sendables added to SmartDashboard or Shuffleboard are sent to the DS on every
       // loop of a TimedRobot. In this case it means that the SendableVersion data would be sent
@@ -131,7 +139,8 @@ public class Robot extends TimedRobot
       Util.logException(e);
       endCompetition();
     }
-
+    // ! What is this?
+    // ! Is this just a number of '-' characters to split up the log.
     Util.consoleLog(functionMarker);
   }
 
@@ -147,7 +156,7 @@ public class Robot extends TimedRobot
   @Override
   public void robotPeriodic() 
   {
-    // This function is called approx every .02 second.
+    // This function is called approx every 0.02 second.
     // Runs the Scheduler. It is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods. Scheduler must be called from the robot's periodic

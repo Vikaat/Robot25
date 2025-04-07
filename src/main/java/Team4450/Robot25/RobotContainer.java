@@ -21,7 +21,6 @@ import Team4450.Robot25.commands.RemoveAlgae;
 import Team4450.Robot25.commands.RetractClimber;
 import Team4450.Robot25.commands.OuttakeAlgae;
 
-
 import Team4450.Robot25.subsystems.AlgaeManipulator;
 import Team4450.Robot25.subsystems.AlgaeGroundIntake;
 import Team4450.Robot25.subsystems.Candle;
@@ -81,6 +80,7 @@ public class RobotContainer
 	public static PhotonVision			pvCoralTagCameraLeft;
 	public static PhotonVision 			pvCoralTagCameraRight;
 	public static PhotonVision			pvAlgaeTagCamera;
+    // ! What is this?
 	private Candle        				candle = null;
 	public static Elevator				elevator;
 	public static ElevatedManipulator	elevatedManipulator;
@@ -106,18 +106,23 @@ public class RobotContainer
 	// constructor called, but you do get initialize called again and then on to execute & etc.
 	// So this means you have to be careful about command initialization activities as a persistent
 	// command in effect has two lifetimes (or scopes): Class global and each new time the command
-	// is scheduled. Note the FIRST doc on the scheduler process is not accurate as of 2020.
+	// is scheduled. 
+
+    // Note the FIRST doc on the scheduler process is not accurate as of 2020.
 	
 	// GamePads. 2 Game Pads use RobotLib XboxController wrapper class for some extra features.
 	// Note that button responsiveness may be slowed as the schedulers command list gets longer 
 	// or commands get longer as buttons are processed once per scheduler run.
 	
 	private XboxController			driverController =  new XboxController(DRIVER_PAD);
+    // ! Why the difference?
 	public static XboxController	utilityController = new XboxController(UTILITY_PAD);
 
+    // ! What does this mean?
 	// private PowerDistribution	pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kCTRE);
 	private PowerDistribution		pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kRev);
 
+    // ! What does this mean?
 	// Compressor class controls the CTRE/REV Pneumatics control Module.
 	private Compressor				pcm = new Compressor(PneumaticsModuleType.REVPH);
 
@@ -140,17 +145,21 @@ public class RobotContainer
 	 */
 	public RobotContainer() throws Exception
 	{
+        // ! Why so many empty consoleLog functions?
 		Util.consoleLog();
 		
+        // ! What does this mean?
 	    SendableRegistry.addLW(pdp, "PDH"); // Only sent to NT in Test mode.
 
 		// Get information about the match environment from the Field Control System.
       
+        // ! Where does this go?
 		getMatchInformation();
 
 		// Read properties file from RoboRio "disk". If we fail to open the file,
 		// log the exception but continue and default to competition robot.
       
+        // ! What is in this?
 		try {
 			robotProperties = Util.readProperties();
 		} catch (Exception e) { Util.logException(e);}
@@ -168,14 +177,19 @@ public class RobotContainer
  		
 		boolean compressorEnabled = true;	// Default if no property.
 
+        // ! Checking robot properties but not checking the specific property?
 		if (robotProperties != null) 
 			compressorEnabled = Boolean.parseBoolean(robotProperties.getProperty("CompressorEnabledByDefault"));
 		
 		SmartDashboard.putBoolean("CompressorEnabled", compressorEnabled);
 
+        // ! What is this?
 		// Reset PDB & PCM sticky faults.
     
+        // ! What is this?
 		resetFaults();
+
+        // ! Why also make them wait until it is ready?
 
 		// Create NavX object here since must done before CameraFeed is created (don't remember why).
         // Navx calibrates at power on and must complete before robot moves. Takes ~1 second for 2nd
@@ -185,20 +199,20 @@ public class RobotContainer
 		// Warning: The navx instance is shared with the swerve drive code. Resetting or otherwise
 		// manipulating the navx (as opposed to just reading data) may crash the swerve drive code.
 
+        // ! Can we seperate the instances?
 		navx = NavX.getInstance();
 
 		// Add navx as a Sendable. Updates the dashboard heading indicator automatically.
  		
+        // ! Why named Gyro2?
 		SmartDashboard.putData("Gyro2", navx);
 
 		// Invert driving joy sticks Y axis so + values mean forward.
 		// Invert driving joy sticks X axis so + values mean right.
-	  
 		driverController.invertY(true);
 		driverController.invertX(true);		
 
 		// Create subsystems prior to button mapping.
-
 		shuffleBoard = new ShuffleBoard();
 		driveBase = new DriveBase();
 		pvCoralTagCameraLeft = new PhotonVision(CORAL_CAMERA_TAG_LEFT, PipelineType.POSE_ESTIMATION, CORAL_CAMERA_TAG_LEFT_TRANSFORM);
@@ -209,43 +223,49 @@ public class RobotContainer
 		elevator = new Elevator(driveBase);
 		climber = new Climber();
 		algaeGroundIntake = new AlgaeGroundIntake();
-		// coralGroundIntake = new CoralGroundIntake();
 		elevatedManipulator = new ElevatedManipulator(coralManipulator, 
-														// coralGroundIntake, 
 														algaeManipulator, 
 														algaeGroundIntake, 
 														elevator);
 		
+        // ! What does this mean?
 		// if (RobotBase.isReal()) 
 		// {
 		// 	candle = new Candle(CTRE_CANDLE, 8+26);
 		// 	candle.setDefaultCommand(new UpdateCandle(candle));
 		// }
 
+        // ! What does this mean?
 		// Create any persistent commands.
 
+        // ! What does this mean?
 		// Set any subsystem Default commands.
 
-		// This sets up the photonVision subsystem to constantly update the robotDrive odometry
+		// This sets up the photonVision subsystem to constantly update the robotDrive odometry // ! At periodic?
 	    // with AprilTags (if it sees them). (As well as vision simulator)
 
 		// pvAlgaeTagCamera.setDefaultCommand(new UpdateVisionPose(driveBase, pvAlgaeTagCamera));
 		// pvCoralTagCameraLeft.setDefaultCommand(new UpdateVisionPose(driveBase, pvCoralTagCameraLeft));
 		// pvCoralTagCameraRight.setDefaultCommand(new UpdateVisionPose(driveBase, pvCoralTagCameraRight));
 
+        // ! Why does this need to be ran on the periodic?
+        // ! Why is this not next to the actual code that it is commenting?
 		// Set the default drive command. This command will be scheduled automatically to run
 		// every teleop period and so use the gamepad joy sticks to drive the robot. 
 
+        // ! Why do this, this seems to only be an issue because drive is being ran every periodic which it does not?
+        // ! Why is this not next to the actual code that it is commenting?
 		// We pass the GetY() functions on the Joysticks as a DoubleSuppier. The point of this 
 		// is removing the direct connection between the Drive and XboxController classes. We
 		// are in effect passing functions into the Drive command so it can read the values
 		// later when the Drive command is executing under the Scheduler. Drive command code does
 		// not have to know anything about the JoySticks (or any other source) but can still read
-		// them. We can pass the DoubleSupplier two ways. First is with () -> lambda expression
+		// them. We can pass the DoubleSupplier two ways. First is with () -> lambda expression // ! I hate Lamba expressions?
 		// which wraps the getLeftY() function in a DoubleSupplier instance. Second is using the
 		// controller class convenience method getRightYDS() which returns getRightY() as a 
 		// DoubleSupplier. We show both ways here as an example.
 
+        // ! Define this next to running the drive command not here?
 		// The joystick controls for driving:
 		// Left stick Y axis -> forward and backwards movement (throttle)
 		// Left stick X axis -> left and right movement (strafe)
@@ -271,10 +291,6 @@ public class RobotContainer
 									driverController.getRightXDS(),
 									driverController));
 		
-		// elevatedManipulator.setDefaultCommand(new RunCommand(
-		//  	()->{elevatedManipulator.moveRelative(-MathUtil.applyDeadband(utilityController.getLeftY() * 0.1, DRIVE_DEADBAND));
-		//  	}, elevatedManipulator));
-		
 		elevator.setDefaultCommand(new RunCommand(
 		 	()->{elevator.move(-MathUtil.applyDeadband(utilityController.getLeftY() * 0.5, DRIVE_DEADBAND));
 		 	}, elevator));
@@ -298,6 +314,8 @@ public class RobotContainer
 			cameraFeed.start();
 		} 
 
+        // ! Why is this wrong, does it not update when a joystick is plugged in?
+        // ! Also why is this here and not like in the Drivestation code on the laptop instead of on the robot?
 		// Start a thread that will wait 30 seconds then disable the missing
 		// joystick warning. This is long enough for when the warning is valid
 		// but will stop flooding the console log when we are legitimately
@@ -307,30 +325,33 @@ public class RobotContainer
 			try {
 				Timer.delay(30);    
 	  
+                // ! Why does this take an argument?
 				DriverStation.silenceJoystickConnectionWarning(true);
 			} catch (Exception e) { }
 		  }).start();
 
 		// Log info about NavX.
-	  
+        // ! How often does this happen? Only once? It seems to send a lot of data to the log.
 		navx.dumpValuesToNetworkTables();
  		
 		if (navx.isConnected())
 			Util.consoleLog("NavX connected version=%s", navx.getAHRS().getFirmwareVersion());
 		else
 		{
+            // ! Update on shuffleboard (Feature).
 			Exception e = new Exception("NavX is NOT connected!");
 			Util.logException(e);
 		}
         
         // Configure autonomous routines and send to dashboard.
-		
+        // ! If this is only ran once (which it is) and defined in the same file do not make it a function and just write it out here.
 		setAutoChoices();
 
 		// Configure the button bindings.
-		
+        // ! If this is only ran once (which it is) and defined in the same file do not make it a function and just write it out here.
         configureButtonBindings();
         
+        // ! What are these so called trajectory files?
         // Load any trajectory files in a separate thread on first scheduler run.
         // We do this because trajectory loads can take up to 10 seconds to load so we want this
         // being done while we are getting started up. Hopefully will complete before we are ready to
@@ -348,9 +369,11 @@ public class RobotContainer
 
 		//PathPlannerTrajectory ppTestTrajectory = loadPPTrajectoryFile("richard");
 
+        // ! Why is this logged here?
 		Util.consoleLog(functionMarker);
 	}
 
+    // ! We don't use 3 sticks and the launchpad so the comment is wrong.
 	/**
 	 * Use this method to define your button->command mappings.
      * 
@@ -361,18 +384,24 @@ public class RobotContainer
 	{
 		Util.consoleLog();
 	  
-		// ------- Driver pad buttons -------------
+		// ------- Driver controller buttons -------------
 		
 		// For simple functions, instead of creating commands, we can call convenience functions on
 		// the target subsystem from an InstantCommand. It can be tricky deciding what functions
 		// should be an aspect of the subsystem and what functions should be in Commands...
+        //
+        // ! The answer the question above is none or all, going forward I do not want to mix, even if this is annoying.
 
 		// POV buttons do same as alternate driving mode but without any lateral
 		// movement and increments of 45deg.
 		// new Trigger(()-> driverController.getPOV() != -1)
 		// 	.onTrue(new PointToYaw(()->PointToYaw.yawFromPOV(driverController.getPOV()), driveBase, false))
+        //
+        //
+        // 	! Maybe some kind of order for registering commands.
+        // 	! Maybe instead of by controller do it by locality of behavior.
 
-		// vibrate between 30 and 25 sec left in match.
+		// Vibrate both controllers starting at 30 and until 25 sec left in match.
 		new Trigger(() -> Timer.getMatchTime() < 30 && Timer.getMatchTime() > 25).whileTrue(new StartEndCommand(
 			() -> {
 				driverController.setRumble(RumbleType.kBothRumble, 0.5);
@@ -381,17 +410,6 @@ public class RobotContainer
 				driverController.setRumble(RumbleType.kBothRumble, 0);
 				utilityController.setRumble(RumbleType.kBothRumble, 0);
 		}));
-
-		// holding top right bumper enables the alternate rotation mode in
-		// which the driver points stick to desired heading.
-
-		//new Trigger(() -> driverController.getRightBumperButton())
-		//	.whileTrue(new PointToYaw(
-		//		()->PointToYaw.yawFromAxes(
-		//			-MathUtil.applyDeadband(driverController.getRightX(), Constants.DRIVE_DEADBAND),
-		//			-MathUtil.applyDeadband(driverController.getRightY(), Constants.DRIVE_DEADBAND)
-		//		), driveBase, false
-		//));
 
 		// toggle slow-mode
 		new Trigger(() -> driverController.getLeftBumperButton())
@@ -474,8 +492,8 @@ public class RobotContainer
 		new Trigger(() -> driverController.getPOV() == 0)
     		.onTrue(new RetractClimber(climber));
 
-        new Trigger(() -> driverController.getXButton())
-            .onTrue(new IntakeAlgaeGround(elevatedManipulator));
+    new Trigger(() -> driverController.getXButton())
+         .onTrue(new IntakeAlgaeGround(elevatedManipulator));
 
 		new Trigger(() -> driverController.getYButton())
 			.onTrue(new Preset(elevatedManipulator, PresetPosition.RESET));
@@ -500,7 +518,7 @@ public class RobotContainer
 			// new Trigger(() -> driverController.getYButton())
         //     .onTrue(new InstantCommand(() -> algaeGroundIntake.stop()));		
 			
-		// -------- Utility pad buttons ----------
+		// -------- Utility controller buttons ----------
 
 		//Use Preset Command for the following:
 
@@ -593,10 +611,9 @@ public class RobotContainer
 			.onTrue(new InstantCommand(() -> elevatedManipulator.algaeManipulator.pivotUp()))
 			.onFalse(new InstantCommand(() -> elevatedManipulator.algaeManipulator.pivotDown()));
 		
-		
-			
-		
 	}
+
+    // ! Again should not be a function because it is only called once.
 	/**
 	 * Use this to pass the autonomous command to the main {@link Robot} class.
 	 * Determines which auto command from the selection made by the operator on the
@@ -630,6 +647,7 @@ public class RobotContainer
 		return autoCommand;
   	}
 
+    // ! Do not use getters just make it public.
 	public static String getAutonomousCommandName()
 	{
 		return autonomousCommandName;
@@ -715,10 +733,12 @@ public class RobotContainer
 		if (monitorPDPThread != null) monitorPDPThread.reset();
     }
 
+    // ! Put this in the correct spot.
 	public void fixPathPlannerGyro() {
 		driveBase.fixPathPlannerGyro();
 	}
 
+    // ! This should not be there if it is used.
 	/**
      * Loads a PathPlanner path file into a path planner trajectory.
      * @param fileName Name of file. Will automatically look in deploy directory and add the .path ext.

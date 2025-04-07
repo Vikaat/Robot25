@@ -1,0 +1,7 @@
+Functions that are ran once will not be functions.
+Getters and Setters will not be used make it public instead.
+Inline comments have // A space and then the sentance, also as you can see they start with a capital letter and end with proper punctuation.
+Sentances start with a capital letter and end with a period or exclimation point or question mark.
+Large sections of commented code will be deleted because we will have git history.
+Minimize runs during the periodical.
+Why are empty console logs used.

@@ -7,10 +7,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import Team4450.Robot25.subsystems.PhotonVision;
 
-import java.util.Optional;
-
-import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
+import org.photonvision.targeting.PhotonPipelineResult;
+
+import java.util.Optional;
 
 import Team4450.Robot25.subsystems.DriveBase;
 
@@ -22,8 +22,8 @@ import Team4450.Robot25.subsystems.DriveBase;
  */
 
 public class DriveToCoralTag extends Command {
-    PIDController rotationController = new PIDController(0.03, 0.0001, 0); // for rotating drivebase
-    PIDController translationController = new PIDController(0.04, 0.005, 0); // for moving drivebase in X,Y plane
+    PIDController rotationController = new PIDController(0.03, 0, 0); // for rotating drivebase
+    PIDController translationController = new PIDController(0.08, 0.005, 0); // for moving drivebase in X,Y plane
     DriveBase robotDrive;
     PhotonVision photonVision;
     private boolean alsoDrive;
@@ -35,7 +35,7 @@ public class DriveToCoralTag extends Command {
         this.robotDrive = robotDrive;
         this.photonVision = photonVision;
         this.alsoDrive = alsoDrive;
-
+      
         // if (alsoDrive) addRequirements(robotDrive);
 
         SendableRegistry.addLW(translationController, "DriveToCoralTag Translation PID");
@@ -59,7 +59,7 @@ public class DriveToCoralTag extends Command {
         translationController.setSetpoint(-15); // target should be at -15 pitch
         translationController.setTolerance(0.5);
 
-        SmartDashboard.putString("DriveToCoralTag", "Tag Tracking Initialized");
+        SmartDashboard.putString("DriveToAlgaeTag", "Tag Tracking Initialized");
     }
 
     @Override
@@ -99,18 +99,16 @@ public class DriveToCoralTag extends Command {
 
         if (alsoDrive) {
             robotDrive.driveRobotRelative(rotation, movement, 0);
-
         } else {
             robotDrive.setTrackingRotation(rotation);
         }
         
     }
-
     @Override
     public void end(boolean interrupted) {
         Util.consoleLog("interrupted=%b", interrupted);
         
-        if (alsoDrive) robotDrive.drive(0, 0, 0, false);
+        // if (alsoDrive) robotDrive.drive(0, 0, 0, false);
         
         if (initialFieldRel) robotDrive.toggleFieldRelative(); // restore beginning state
         
@@ -119,7 +117,7 @@ public class DriveToCoralTag extends Command {
         robotDrive.disableTrackingSlowMode();
         robotDrive.clearPPRotationOverride();
 
-        SmartDashboard.putString("DriveToCoralTag", "Tag Tracking Ended");
+        SmartDashboard.putString("DriveToAlgaeTag", "Tag Tracking Ended");
 
     }
 }

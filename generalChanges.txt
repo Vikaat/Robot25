@@ -1,0 +1,5 @@
+Change the watchdog timer to be 0.02 instead of the larger one (The one that is flooding the roborio).
+How to minimize the logging that is flooding the robo rio?
+Add a way to delete the deploy directory on each upload (https://www.chiefdelphi.com/t/clearing-the-deploy-directory-on-a-roborio-running-commands-on-the-roborio/458273/5).
+What is the overhead for sending shuffleboard periodics?
+Make controllers not switch on the drive station.
