@@ -23,6 +23,10 @@ import edu.wpi.first.math.util.Units;
 public class DriveConstants {
   public static final double maxSpeedMetersPerSec = 4.92;
   public static final double odometryFrequency = 100.0; // Hz
+  public static double SLOW_MODE_SPEED_LIMITER = 0.5;
+  public static double SLOW_MODE_ROT_SPEED_LIMITER = 0.5;
+  public static double speedLimiter = 1.0;
+  public static double rotSpeedLimiter = 1.0;
   public static final double trackWidth = Units.inchesToMeters(27);
   public static final double wheelBase = Units.inchesToMeters(27);
   public static final double driveBaseRadius = Math.hypot(trackWidth / 2.0, wheelBase / 2.0);
@@ -41,8 +45,6 @@ public class DriveConstants {
   public static final Rotation2d backRightZeroRotation = new Rotation2d(0.0);
 
   // Device CAN IDs
-  public static final int pigeonCanId = 9;
-
   public static final int frontLeftDriveCanId = 1;
   public static final int backLeftDriveCanId = 3;
   public static final int frontRightDriveCanId = 5;

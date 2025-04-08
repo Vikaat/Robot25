@@ -18,6 +18,7 @@ import static edu.wpi.first.units.Units.*;
 
 import Team4450.Robot25.Constants;
 import Team4450.Robot25.Constants.Mode;
+import Team4450.Robot25.commands.DriveCommands;
 import Team4450.Robot25.util.LocalADStarAK;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -58,6 +59,9 @@ public class Drive extends SubsystemBase {
   private final SysIdRoutine sysId;
   private final Alert gyroDisconnectedAlert =
       new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
+  public static boolean slowModeEnabled = false;
+  public double speedLimiter = 1.0;
+  public double rotSpeedLimiter = 1.0;
 
   private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(moduleTranslations);
   private Rotation2d rawGyroRotation = new Rotation2d();
@@ -319,5 +323,17 @@ public class Drive extends SubsystemBase {
   /** Returns the maximum angular speed in radians per sec. */
   public double getMaxAngularSpeedRadPerSec() {
     return maxSpeedMetersPerSec / driveBaseRadius;
+  }
+
+  public void enableSlowMode(){
+    slowModeEnabled = true;
+    speedLimiter = DriveConstants.SLOW_MODE_SPEED_LIMITER;
+    rotSpeedLimiter = DriveConstants.SLOW_MODE_ROT_SPEED_LIMITER;
+  }
+
+  public void disableSlowMode(){
+    slowModeEnabled = false;
+    speedLimiter = 1.0;
+    rotSpeedLimiter = 1.0;
   }
 }

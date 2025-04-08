@@ -115,6 +115,7 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousInit() {
     autonomousCommand = robotContainer.getAutonomousCommand();
+    RobotContainer.elevator.limiter = false;
 
     // schedule the autonomous command (example)
     if (autonomousCommand != null) {
@@ -136,6 +137,8 @@ public class Robot extends LoggedRobot {
     if (autonomousCommand != null) {
       autonomousCommand.cancel();
     }
+    RobotContainer.elevator.limiter = true;
+
   }
 
   /** This function is called periodically during operator control. */
