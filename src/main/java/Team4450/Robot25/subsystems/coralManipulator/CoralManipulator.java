@@ -4,7 +4,6 @@ import Team4450.Lib.Util;
 import Team4450.Lib.ValveDA;
 import static Team4450.Robot25.subsystems.coralManipulator.CoralManipulatorConstants.CORAL_MANIPULATOR;
 import static Team4450.Robot25.subsystems.coralManipulator.CoralManipulatorConstants.CORAL_PIVOT;
-import static Team4450.Robot25.subsystems.coralManipulator.CoralManipulatorConstants.CoralManipulatorState;
 
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.PersistMode;

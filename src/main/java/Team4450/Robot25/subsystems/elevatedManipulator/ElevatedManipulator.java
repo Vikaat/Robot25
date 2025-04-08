@@ -4,7 +4,10 @@ import Team4450.Lib.Util;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import Team4450.Robot25.subsystems.*;
+import Team4450.Robot25.subsystems.coralManipulator.CoralManipulator;
+import Team4450.Robot25.subsystems.algaeManipulator.AlgaeManipulator;
+import Team4450.Robot25.subsystems.algaeGroundIntake.AlgaeGroundIntake;
+import Team4450.Robot25.subsystems.elevator.Elevator;
 
 public class ElevatedManipulator extends SubsystemBase {
 
