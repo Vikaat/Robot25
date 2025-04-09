@@ -3,41 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 1.0575889518992114,
+        "y": 7.099006835581519
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.013282910175676,
-        "y": 6.5274984191074985
+        "x": 2.2921994357638873,
+        "y": 5.602914134837963
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftPickup"
     },
     {
       "anchor": {
-        "x": 5.166769560390973,
-        "y": 5.0964860911203305
+        "x": 3.2350929542824063,
+        "y": 6.011528501157407
       },
       "prevControl": {
-        "x": 4.166769560390973,
-        "y": 6.0964860911203305
-      },
-      "nextControl": {
-        "x": 6.166769560390973,
-        "y": 4.0964860911203305
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 7.0,
-        "y": 1.0
-      },
-      "prevControl": {
-        "x": 6.75,
-        "y": 2.5
+        "x": 1.5012099752383792,
+        "y": 6.76202631863671
       },
       "nextControl": null,
       "isLocked": false,
@@ -49,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 1.5,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
@@ -57,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 0.0,
+    "rotation": -153.99614475099776
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Pickups To Reefs (good)",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 0.0
+    "velocity": 1.0,
+    "rotation": -145.0
   },
   "useDefaultConstraints": false
 }
