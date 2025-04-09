@@ -17,10 +17,17 @@ import Team4450.Lib.MonitorCompressorPH;
 import Team4450.Lib.MonitorPDP;
 import Team4450.Lib.Util;
 
+
+import static Team4450.Robot25.Constants.*;
+
+import Team4450.Robot25.commands.Preset;
 import Team4450.Robot25.commands.DriveCommands;
 import Team4450.Robot25.commands.IntakeCoral;
 import Team4450.Robot25.commands.OuttakeCoral;
 import Team4450.Robot25.commands.RemoveAlgae;
+import Team4450.Robot25.commands.OuttakeAlgae;
+import Team4450.Robot25.commands.OuttakeProcessor;
+import Team4450.Robot25.commands.IntakeAlgaeGround;
 
 import Team4450.Robot25.subsystems.algaeGroundIntake.AlgaeGroundIntake;
 import Team4450.Robot25.subsystems.algaeManipulator.AlgaeManipulator;
@@ -39,26 +46,29 @@ import Team4450.Robot25.subsystems.vision.VisionIO;
 import Team4450.Robot25.subsystems.vision.VisionIOPhotonVision;
 import Team4450.Robot25.subsystems.vision.VisionIOPhotonVisionSim;
 import Team4450.Robot25.subsystems.vision.VisionConstants;
+import Team4450.Robot25.subsystems.climber.Climber;
 
-import Team4450.Robot25.Constants;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj.PneumaticHub;
 import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.Compressor;
-
-import static Team4450.Robot25.Constants.REV_PDB;
+import edu.wpi.first.wpilibj.Timer;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
@@ -72,6 +82,7 @@ public class RobotContainer {
   // Subsystems
   public static Drive drive;
   public static Vision vision;
+  public static Climber climber;
   public static CoralManipulator coralManipulator;
   public static AlgaeManipulator algaeManipulator;
   public static AlgaeGroundIntake algaeGroundIntake;
@@ -83,7 +94,7 @@ public class RobotContainer {
   private final CommandXboxController utilityController = new CommandXboxController(1);
 
   // Dashboard inputs
-  private final LoggedDashboardChooser<Command> autoChooser;
+  private LoggedDashboardChooser<Command> autoChooser;
 
   private PowerDistribution		pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kRev);
   private Compressor				pcm = new Compressor(PneumaticsModuleType.REVPH);
@@ -122,6 +133,14 @@ public class RobotContainer {
     
 		resetFaults();
 
+        monitorCompressorThread = MonitorCompressorPH.getInstance(pcm);
+   		monitorCompressorThread.setDelay(1.0);
+   		monitorCompressorThread.SetLowPressureAlarm(50);
+   		monitorCompressorThread.start();
+   		
+   		monitorPDPThread = MonitorPDP.getInstance(pdp);
+   		monitorPDPThread.start();
+
     switch (Constants.currentMode) {
       case REAL:
         // Real robot, instantiate hardware IO implementations
@@ -139,6 +158,9 @@ public class RobotContainer {
                 new VisionIOPhotonVision(VisionConstants.camera0Name, VisionConstants.robotToCamera0),
                 new VisionIOPhotonVision(VisionConstants.camera1Name, VisionConstants.robotToCamera1));
         
+        climber = 
+            new Climber();
+
         coralManipulator = 
             new CoralManipulator();
 
@@ -172,6 +194,9 @@ public class RobotContainer {
                 new VisionIOPhotonVisionSim(VisionConstants.camera0Name, VisionConstants.robotToCamera0, drive::getPose),
                 new VisionIOPhotonVisionSim(VisionConstants.camera1Name, VisionConstants.robotToCamera1, drive::getPose));
 
+        climber =
+            new Climber();
+
         coralManipulator = 
             new CoralManipulator();
         
@@ -200,7 +225,10 @@ public class RobotContainer {
         
         vision = 
             new Vision(drive::addVisionMeasurement, new VisionIO() {}, new VisionIO() {});
-        
+
+        climber =
+            new Climber();
+
         coralManipulator = 
             new CoralManipulator();
         
@@ -237,6 +265,28 @@ public class RobotContainer {
     autoChooser.addOption(
         "Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+    
+    new Thread(() -> {
+			try {
+				Timer.delay(30);    
+	  
+				DriverStation.silenceJoystickConnectionWarning(true);
+			} catch (Exception e) { }
+		  }).start();
+    
+    // Default command, normal field-relative drive
+    drive.setDefaultCommand(
+        DriveCommands.joystickDrive(
+            drive,
+            () -> -driverController.getLeftY(),
+            () -> -driverController.getLeftX(),
+            () -> -driverController.getRightX()));
+
+    elevator.setDefaultCommand(
+        Commands.run(() -> elevator.move(-utilityController.getLeftY() * 0.5), elevator));
+
+    setAutoChoices();
+
     // Configure the button bindings
     configureButtonBindings();
   }
@@ -248,16 +298,18 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.JoystickButton}.
    */
   private void configureButtonBindings() {
-    // Default command, normal field-relative drive
-    drive.setDefaultCommand(
-        DriveCommands.joystickDrive(
-            drive,
-            () -> -driverController.getLeftY(),
-            () -> -driverController.getLeftX(),
-            () -> -driverController.getRightX()));
 
-    elevator.setDefaultCommand(
-        Commands.run(() -> elevator.move(-utilityController.getLeftY()), elevator));
+    if (Timer.getMatchTime() < 30 && Timer.getMatchTime() > 25) {
+        new StartEndCommand(
+            () -> {
+                driverController.setRumble(RumbleType.kBothRumble, 0.5);
+                utilityController.setRumble(RumbleType.kBothRumble, 0.5);
+            },
+            () -> {
+                driverController.setRumble(RumbleType.kBothRumble, 0);
+                utilityController.setRumble(RumbleType.kBothRumble, 0);
+            }).schedule();
+    }
 
     // Lock to 0° when A button is held
     driverController
@@ -274,7 +326,7 @@ public class RobotContainer {
 
     // Reset gyro to 0° when B button is pressed
     driverController
-        .b()
+        .start()
         .onTrue(
             Commands.runOnce(
                     () ->
@@ -283,45 +335,63 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
     
+    driverController
+        .leftBumper()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        drive.enableSlowMode())
+                .ignoringDisable(true))
+        .onFalse(
+            Commands.runOnce(
+                    () ->
+                        drive.disableSlowMode())
+                .ignoringDisable(true));
+
+    driverController
+        .povDown()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        climber.extendPiston())
+                .ignoringDisable(true));
+    
+    driverController
+        .povUp()
+        .onTrue(
+            Commands.runOnce(
+                    () ->
+                        climber.retractPiston())
+                .ignoringDisable(true));
 
     utilityController
         .x()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        elevatedManipulator.executeSetPosition(PresetPosition.CORAL_SCORING_L1))
+            new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L1_NEW)
                 .ignoringDisable(false));
 
     utilityController
         .a()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        elevatedManipulator.executeSetPosition(PresetPosition.CORAL_SCORING_L2))
+            new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L2)
                 .ignoringDisable(false));
 
     utilityController
         .b()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        elevatedManipulator.executeSetPosition(PresetPosition.CORAL_SCORING_L3))
+            new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L3)
                 .ignoringDisable(false));
         
     utilityController
         .y()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        elevatedManipulator.executeSetPosition(PresetPosition.CORAL_SCORING_L4))
+            new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L4)
                 .ignoringDisable(false));
     
     utilityController
         .back()
         .onTrue(
-            Commands.runOnce(
-                    () ->
-                        elevatedManipulator.executeSetPosition(PresetPosition.RESET))
+            new Preset(elevatedManipulator, PresetPosition.RESET)
                 .ignoringDisable(false));
     
     utilityController
@@ -336,7 +406,12 @@ public class RobotContainer {
         .leftTrigger()
         .whileTrue(
             new IntakeCoral(elevatedManipulator)
-            .ignoringDisable(false));
+            .ignoringDisable(false))
+        .onFalse(
+            Commands.runOnce(
+                    ()  ->
+                        coralManipulator.stop())
+            );
 
     utilityController
         .rightTrigger()
@@ -348,6 +423,37 @@ public class RobotContainer {
         .leftBumper()
         .onTrue(
             new RemoveAlgae(elevatedManipulator)
+                .ignoringDisable(false));
+    
+    utilityController
+        .rightBumper()
+        .onTrue(
+            new OuttakeAlgae(elevatedManipulator)
+                .ignoringDisable(false)
+        );
+    
+    utilityController
+        .povUp()
+        .onTrue(
+            new Preset(elevatedManipulator, PresetPosition.ALGAE_REMOVE_L3)
+                .ignoringDisable(false));
+    
+    utilityController
+        .povDown()
+        .onTrue(
+            new Preset(elevatedManipulator, PresetPosition.ALGAE_REMOVE_L2)
+                .ignoringDisable(false));
+    
+    utilityController
+        .povLeft()
+        .onTrue(
+            new Preset(elevatedManipulator, PresetPosition.ALGAE_PROCESSOR_SCORING)
+                .ignoringDisable(false));
+    
+    utilityController
+        .povRight()
+        .onTrue(
+            new Preset(elevatedManipulator, PresetPosition.ALGAE_NET_SCORING)
                 .ignoringDisable(false));
       }
 
@@ -366,6 +472,38 @@ public class RobotContainer {
 		if (monitorPDPThread != null) monitorPDPThread.reset();
     }
 
+
+
+	private void setAutoChoices()
+	{
+	 	Util.consoleLog();
+		
+		// Register commands called from PathPlanner Autos.
+
+		NamedCommands.registerCommand("Intake Coral", new IntakeCoral(elevatedManipulator));
+		NamedCommands.registerCommand("Outtake Coral", new OuttakeCoral(elevatedManipulator));
+		NamedCommands.registerCommand("Remove Algae", new RemoveAlgae(elevatedManipulator));
+		NamedCommands.registerCommand("Outtake Algae", new OuttakeAlgae(elevatedManipulator));
+		NamedCommands.registerCommand("Outtake Processor", new OuttakeProcessor(elevatedManipulator));
+		NamedCommands.registerCommand("Raise to L1", new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L1_NEW));
+		NamedCommands.registerCommand("Raise to L2", new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L2));
+		NamedCommands.registerCommand("Raise to L3", new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L3));
+		NamedCommands.registerCommand("Raise to L4", new Preset(elevatedManipulator, PresetPosition.CORAL_SCORING_L4));
+		NamedCommands.registerCommand("Remove Algae L2", new Preset(elevatedManipulator, PresetPosition.ALGAE_REMOVE_L2));
+		NamedCommands.registerCommand("Remove Algae L3", new Preset(elevatedManipulator, PresetPosition.ALGAE_REMOVE_L3)); 
+		NamedCommands.registerCommand("Algae Net Scoring", new Preset(elevatedManipulator, PresetPosition.ALGAE_NET_SCORING)); 
+		NamedCommands.registerCommand("Algae Processor Scoring", new Preset(elevatedManipulator, PresetPosition.ALGAE_PROCESSOR_SCORING));
+		NamedCommands.registerCommand("Intake Algae Ground", new IntakeAlgaeGround(elevatedManipulator));
+		NamedCommands.registerCommand("Reset Elevator", new Preset(elevatedManipulator, PresetPosition.RESET));
+		NamedCommands.registerCommand("Algae Pivot Up", new InstantCommand(() -> algaeManipulator.pivotUp()));
+		NamedCommands.registerCommand("Climb", new Preset(elevatedManipulator, PresetPosition.CLIMB));
+		// Create a chooser with the PathPlanner Autos located in the PP
+		// folders.
+
+        autoChooser = new LoggedDashboardChooser<>("Auto Choices", AutoBuilder.buildAutoChooser());
+		
+        SmartDashboard.putData("Auto Program", autoChooser.getSendableChooser());
+	}
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
@@ -374,4 +512,9 @@ public class RobotContainer {
   public Command getAutonomousCommand() {
     return autoChooser.get();
   }
+
+  public String getAutonomousCommandName()
+	{
+        return getAutonomousCommand().getName();
+	}
 }

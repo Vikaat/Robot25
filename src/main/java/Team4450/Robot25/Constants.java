@@ -15,12 +15,19 @@ package Team4450.Robot25;
 
 import edu.wpi.first.wpilibj.RobotBase;
 
+import java.util.Properties;
+
 /**
  * This class defines the runtime mode used by AdvantageKit. The mode is always "real" when running
  * on a roboRIO. Change the value of "simMode" to switch between "sim" (physics sim) and "replay"
  * (log replay from a file).
  */
 public final class Constants {
+
+  public static Properties	robotProperties;
+	  
+	public static boolean		isClone = false, isComp = false, tracing = false;
+  
   public static final int		COMPRESSOR = 1;
   public static final int  REV_PDB = 20;
   public static final Mode simMode = Mode.SIM;

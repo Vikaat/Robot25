@@ -82,7 +82,12 @@ public class Robot extends LoggedRobot {
 
     // Instantiate our RobotContainer. This will perform all our button bindings,
     // and put our autonomous chooser on the dashboard.
-    robotContainer = new RobotContainer();
+    try {
+        robotContainer = new RobotContainer();
+    } catch (Exception e) {
+        e.printStackTrace();
+        throw new RuntimeException("Failed to initialize RobotContainer", e);
+    }
   }
 
   /** This function is called periodically during all modes. */
