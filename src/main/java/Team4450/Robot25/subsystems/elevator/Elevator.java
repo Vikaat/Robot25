@@ -137,25 +137,25 @@ public class Elevator extends SubsystemBase {
         // height 0.59 L2 1 drive speed and rotation speed
         // height 0.99 L3 0.48 drive speed and 0.68 rotation speed
         // height 1.59 L4 0.2 drive speed and 0.4 rotation speed
-        if(limiter == true){
-            if (!Drive.slowModeEnabled) {
-            drive.speedLimiter = Math.pow(2, -(3.1 * this.getElevatorHeight() - 0.65));
-            drive.rotSpeedLimiter = Math.pow(2, -(3.1 * this.getElevatorHeight() - 0.65)) + 0.2;
-            if (drive.speedLimiter > 1) {
-                drive.speedLimiter = 1;
-            }
-            if (drive.rotSpeedLimiter > 1) {
-                drive.rotSpeedLimiter = 1;
-            }
-            if (drive.speedLimiter < 0.2) {
-                drive.speedLimiter = 0.2;
-            }
-            if (drive.rotSpeedLimiter < 0.4) {
-                drive.rotSpeedLimiter = 0.4;
-            }
-            // Util.consoleLog("%.2f %.2f", drive.speedLimiter, drive.rotSpeedLimiter);
-        }
-    }
+    //     if(limiter == true){
+    //         if (!Drive.slowModeEnabled) {
+    //         drive.speedLimiter = Math.pow(2, -(3.1 * this.getElevatorHeight() - 0.65));
+    //         drive.rotSpeedLimiter = Math.pow(2, -(3.1 * this.getElevatorHeight() - 0.65)) + 0.2;
+    //         if (drive.speedLimiter > 1) {
+    //             drive.speedLimiter = 1;
+    //         }
+    //         if (drive.rotSpeedLimiter > 1) {
+    //             drive.rotSpeedLimiter = 1;
+    //         }
+    //         if (drive.speedLimiter < 0.2) {
+    //             drive.speedLimiter = 0.2;
+    //         }
+    //         if (drive.rotSpeedLimiter < 0.4) {
+    //             drive.rotSpeedLimiter = 0.4;
+    //         }
+    //         // Util.consoleLog("%.2f %.2f", drive.speedLimiter, drive.rotSpeedLimiter);
+    //     }
+    // }
     }
 
     /**
