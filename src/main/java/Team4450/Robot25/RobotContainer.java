@@ -98,7 +98,7 @@ public class RobotContainer {
 
   private PowerDistribution		pdp = new PowerDistribution(REV_PDB, PowerDistribution.ModuleType.kRev);
   private Compressor				pcm = new Compressor(PneumaticsModuleType.REVPH);
-  private final MonitorPDP     		monitorPDPThread;
+//   private final MonitorPDP     		monitorPDPThread;
   private MonitorCompressorPH	monitorCompressorThread;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -138,8 +138,8 @@ public class RobotContainer {
    		monitorCompressorThread.SetLowPressureAlarm(50);
    		monitorCompressorThread.start();
    		
-   		monitorPDPThread = MonitorPDP.getInstance(pdp);
-   		monitorPDPThread.start();
+   		// monitorPDPThread = MonitorPDP.getInstance(pdp);
+   		// monitorPDPThread.start();
 
     switch (Constants.currentMode) {
       case REAL:
@@ -469,7 +469,7 @@ public class RobotContainer {
 		pdp.clearStickyFaults();
 		//pcm.clearAllStickyFaults(); // Add back if we use a CTRE pcm.
 		
-		if (monitorPDPThread != null) monitorPDPThread.reset();
+		// if (monitorPDPThread != null) monitorPDPThread.reset();
     }
 
 
