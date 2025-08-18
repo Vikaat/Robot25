@@ -15,23 +15,16 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-//import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-//import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 
 import Team4450.Robot25.Constants.AutoConstants;
 import Team4450.Robot25.Constants.DriveConstants;
 import Team4450.Robot25.Constants.ModuleConstants;
 import Team4450.Robot25.utility.SwerveUtils;
-import Team4450.Robot25.AdvantageScope;
 import Team4450.Robot25.Constants;
 import Team4450.Robot25.RobotContainer;
 import Team4450.Lib.Util;
-import Team4450.Lib.FXEncoder;
-import Team4450.Lib.Talon_FX;
 
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -43,7 +36,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.util.WPIUtilJNI;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.RobotBase;
@@ -98,9 +90,6 @@ public class DriveBase extends SubsystemBase {
   private double        trackingRotation = 0; // this is the value that will store overridden joystick rot
 
   private Optional<Rotation2d>        pathplannerOverride = Optional.empty();
-
-  // Field2d object creates the field display on the simulation and gives us an API
-  // to control what is displayed (the simulated robot).
 
   private final Field2d     field2d = new Field2d();
 
@@ -178,12 +167,6 @@ public class DriveBase extends SubsystemBase {
    rearLeft.setTranslation2d(new Translation2d(-DriveConstants.kTrackWidth / 2.0, DriveConstants.kTrackWidth / 2.0));
    rearRight.setTranslation2d(new Translation2d(-DriveConstants.kTrackWidth / 2.0, -DriveConstants.kTrackWidth / 2.0));
 
-    // Set up simulated NavX.
-
-    if (RobotBase.isSimulation()) RobotContainer.navx.initializeSim();
-
-    // Field2d drives the field display under simulation.
-
     SmartDashboard.putData("Field2d", field2d);
 
     // Save initial brake mode to we can toggle it later.
@@ -214,10 +197,6 @@ public class DriveBase extends SubsystemBase {
             rearRight.getPosition()
         });
 
-    // update 3d simulation: look in AdvantageScope.java for more
-    AdvantageScope.getInstance().setRobotPose(currentPose);
-    AdvantageScope.getInstance().update();
-
     SmartDashboard.putNumber("Gyro angle", getGyroYaw());
     SmartDashboard.putString("Robot pose", currentPose.toString());
 
@@ -232,8 +211,6 @@ public class DriveBase extends SubsystemBase {
     distanceTraveled += currentDistance;
 
     SmartDashboard.putNumber("Distance Traveled(m)", distanceTraveled);
-
-    // Track gyro yaw to support simulation of resettable yaw.
 
     yawAngle += navx.getAngle() - lastYawAngle;
 
@@ -257,36 +234,6 @@ public class DriveBase extends SubsystemBase {
     // Updates sim display of swerve modules.
     setField2dModulePoses();
 
-    AdvantageScope.getInstance().setSwerveModules(frontLeft, frontRight, rearLeft, rearRight);
-
-  }
-
-  /**
-   * Called on every scheduler loop when in simulation.
-   */
-  @Override
-  public void simulationPeriodic()
-  {
-    // We are not using this call now because the REV simulation does not work
-    // correctly. Will leave the code in place in case this issue gets fixed.
-    //if (robot.isEnabled()) REVPhysicsSim.getInstance().run();
-
-    // want to simulate navX gyro changing as robot turns
-    // information available is radians per second and this happens every 20ms
-    // radians/2pi = 360 degrees so 1 degree per second is radians / 2pi
-    // increment is made every 20 ms so radian adder would be (rads/sec) * (20/1000)
-    // degree adder would be radian adder * 360/2pi
-    // so degree increment multiplier is 360/100pi = 1.1459
-
-    double temp = chassisSpeeds.omegaRadiansPerSecond * 1.1459155;
-
-    simAngle += temp;
-
-    RobotContainer.navx.setSimAngle(simAngle);
-
-    Unmanaged.feedEnable(20);
-
-    //talon_FX.simulationPeriodic();
   }
 
   /**
@@ -487,12 +434,9 @@ public class DriveBase extends SubsystemBase {
   /**
    * Drives robot by commanding swerve modules from a ChassisSpeeds object.
    * Identical to driveChassisSpeeds() but reserved for PathPlanner to enable
-   * simulation overrides and other changes we may want to make.
    * @param speeds The ChassisSpeeds object.
    */
   public void driveChassisSpeedsPP(ChassisSpeeds speeds) {
-    if (RobotBase.isSimulation()) this.chassisSpeeds = new ChassisSpeeds(0, 0, -speeds.omegaRadiansPerSecond);
-    
     driveChassisSpeeds(speeds);
   }
   
@@ -631,7 +575,6 @@ public class DriveBase extends SubsystemBase {
   /**
    * Update the pose of a swerve module on the field2d object. Module
    * pose is connected to the robot pose so they move together on the
-   * field simulation display.
    * @param module Swerve module to update.
    */
   private void updateModulePose(MAXSwerveModule module)
@@ -923,11 +866,8 @@ public class DriveBase extends SubsystemBase {
   private void configureAutoBuilder() {
     Util.consoleLog();
 
-    // different PID values for real/simulation because they are quite different.
     PIDConstants rotPID = new PIDConstants(AutoConstants.kHolonomicPathFollowerP, 0.0, 0.0);
     
-    if (RobotBase.isSimulation()) rotPID = new PIDConstants(0.5, 0.0, 0.0);
-
     // Load the RobotConfig from the GUI settings. 
     RobotConfig config = null;
 

@@ -151,18 +151,6 @@ public class MAXSwerveModule implements Sendable {
     this.chassisAngularOffset = chassisAngularOffset;
         
     drivingEncoder.setPosition(0);
-    
-    if (RobotBase.isSimulation()) 
-    {
-      // Note that the REV simulation does not work correctly. We have hacked
-      // a solution where we drive the sim through our code, not by reading the
-      // REV simulated encoder position and velocity, which are incorrect. However, 
-      // registering the motor controller with the REV sim is still needed.
-
-      turningSim = new SparkSim(turningSparkMax, DCMotor.getNeo550(1));
-  
-      drivingSim = new SparkSim(drivingSparkFlex, DCMotor.getNeoVortex(1));
-    }
   }
 
   /**

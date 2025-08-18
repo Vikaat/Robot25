@@ -107,10 +107,6 @@ public class TimedRobot extends IterativeRobotBase {
   public void startCompetition() {
     robotInit();
 
-    if (isSimulation()) {
-      simulationInit();
-    }
-
     // Tell the DS that the robot is ready to be enabled
     System.out.println("********** Robot program startup complete **********");
     DriverStationJNI.observeUserProgramStarting();

@@ -3,17 +3,6 @@
   "robotLength": 0.8128,
   "holonomicMode": true,
   "pathFolders": [
-    "Misc. (good)",
-    "Net to Pickup (good)",
-    "Net to Reef (good)",
-    "A-Pod",
-    "Pickups To Reefs (good)",
-    "Processor to reef (good)",
-    "Reef to Processor (good)",
-    "Reef to Reef (good-enough)",
-    "Reefs to Net (good)",
-    "Reefs to Pickups (good) ",
-    "Starts to Reefs"
   ],
   "autoFolders": [],
   "defaultMaxVel": 2.0,
